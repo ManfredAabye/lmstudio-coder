@@ -66,14 +66,31 @@ Code:
 
 | Sprache    | Endung  |
 | ---------- | ------- |
-| Python     | `.py`   |
-| JavaScript | `.js`   |
-| C++        | `.cpp`  |
-| Rust       | `.rs`   |
-| Java       | `.java` |
-| Bash       | `.sh`   |
-| HTML       | `.html` |
-| …          | …       |
+| Assembly  | .asm    |
+| Bash      | .sh     |
+| Batch     | .bat    |
+| C#        | .cs     |
+| C++       | .cpp    |
+| CSS       | .css    |
+| F#        | .fs     |
+| Go        | .go     |
+| HTML      | .html   |
+| JSON      | .json   |
+| Java      | .java   |
+| JavaScript| .js     |
+| Lua       | .lua    |
+| Markdown  | .md     |
+| PHP       | .php    |
+| PowerShell| .ps1    |
+| Python    | .py     |
+| Ruby      | .rb     |
+| Rust      | .rs     |
+| SQL       | .sql    |
+| Shell     | .sh     |
+| TypeScript| .ts     |
+| VBScript  | .vbs    |
+| Visual Basic| .vb   |
+| XML       | .xml    |
 
 > Die vollständige Liste wird dynamisch aus dem internen Mapping erzeugt.
 
