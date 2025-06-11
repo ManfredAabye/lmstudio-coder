@@ -16,11 +16,7 @@ Dieses Tool aktualisiert automatisch Quellcode-Dateien in einem Verzeichnis mith
 - [LM Studio](https://lmstudio.ai) installiert und gestartet
 - Ein passendes LLM-Modell ist geladen und als **lokaler Chat-Endpunkt** erreichbar:
 
-```Link
-
 [http://localhost:1234/v1/chat/completions](http://localhost:1234/v1/chat/completions)
-
-````
 
 > Tipp: In LM Studio unter „API“ den lokalen Server aktivieren und Port 1234 verwenden.
 
