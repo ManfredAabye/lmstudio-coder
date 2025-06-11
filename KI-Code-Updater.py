@@ -1,16 +1,12 @@
+# -*- coding: utf-8 -*-
 # KI-Code-Updater.py
-# Dieses Skript aktualisiert Python-Code in einem Verzeichnis mithilfe von LM Studio KI.
-
-# Prompt Beispiel für Blender 4.4-Update
-# """Aktualisiere diesen Blender-Python-Code für Version 4.4:
-#     - Ersetze veraltete API-Aufrufe (z. B. `bpy.context` → `bpy.context.scene`).
-#     - Suche 2.8.0 und ersetze diese durch 4.4.0
-#     - Behalte die Funktionalität bei.
-#     Hier der Code:\n\n{code}"""
+# Dieses Skript aktualisiert Code in einem Verzeichnis mithilfe von LM Studio KI.
 
 import os
 import json
 import requests
+import time
+import logging
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from datetime import datetime
@@ -29,9 +25,18 @@ class CodeUpdaterApp:
     def __init__(self, root):
         self.root = root
         root.title("KI Code-Updater")
+        self.setup_logging()
         
         self.create_ui()
         self.load_last_settings()
+        
+    def setup_logging(self):
+        logging.basicConfig(
+            filename="code_updater.log",
+            level=logging.INFO,
+            format="%(asctime)s - %(levelname)s - %(message)s",
+            encoding="utf-8"
+        )
         
     def create_ui(self):
         ttk.Label(self.root, text="Arbeitsverzeichnis:").grid(row=0, column=0, padx=5, pady=5)
@@ -76,9 +81,10 @@ Hier ist der Code:
         ttk.Button(button_frame, text="Code aktualisieren", command=self.run_update).pack(side="left", padx=10)
         ttk.Button(button_frame, text="Beenden", command=self.root.quit).pack(side="right", padx=10)
 
+
     def load_last_settings(self):
         try:
-            with open("last_settings.json", "r") as f:
+            with open("last_settings.json", "r", encoding='utf-8') as f:
                 settings = json.load(f)
                 self.dir_entry.insert(0, settings.get("directory", ""))
                 self.language_var.set(settings.get("language", "Python"))
@@ -90,8 +96,8 @@ Hier ist der Code:
             "directory": self.dir_entry.get(),
             "language": self.language_var.get()
         }
-        with open("last_settings.json", "w") as f:
-            json.dump(settings, f)
+        with open("last_settings.json", "w", encoding='utf-8') as f:
+            json.dump(settings, f, ensure_ascii=False, indent=2)
 
     def load_prompt(self):
         filepath = filedialog.askopenfilename(
@@ -100,7 +106,7 @@ Hier ist der Code:
         )
         if filepath:
             try:
-                with open(filepath, "r") as f:
+                with open(filepath, "r", encoding='utf-8') as f:
                     if filepath.endswith(".json"):
                         data = json.load(f)
                         self.prompt_entry.delete("1.0", "end")
@@ -121,14 +127,14 @@ Hier ist der Code:
             try:
                 prompt_content = self.prompt_entry.get("1.0", "end-1c")
                 if filepath.endswith(".json"):
-                    with open(filepath, "w") as f:
+                    with open(filepath, "w", encoding='utf-8') as f:
                         json.dump({
                             "language": self.language_var.get(),
                             "prompt": prompt_content,
                             "saved_at": datetime.now().isoformat()
-                        }, f, indent=2)
+                        }, f, ensure_ascii=False, indent=2)
                 else:
-                    with open(filepath, "w") as f:
+                    with open(filepath, "w", encoding='utf-8') as f:
                         f.write(prompt_content)
             except Exception as e:
                 messagebox.showerror("Fehler", f"Prompt konnte nicht gespeichert werden:\n{str(e)}")
@@ -139,30 +145,37 @@ Hier ist der Code:
             self.dir_entry.delete(0, tk.END)
             self.dir_entry.insert(0, directory)
 
+
     def ask_lm_studio(self, prompt, language):
-        try:
-            response = requests.post(
-                "http://localhost:1234/v1/chat/completions",
-                json={
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": f"Du bist ein {language}-Experte. Antworte NUR mit Code."
-                        },
-                        {
-                            "role": "user",
-                            "content": prompt
-                        }
-                    ],
-                    "temperature": 0.3,
-                    "max_tokens": 2048
-                },
-                timeout=90
-            )
-            return response.json()["choices"][0]["message"]["content"]
-        except Exception as e:
-            self.status_var.set(f"API-Fehler: {str(e)}")
-            return None
+        max_retries = 3
+        retry_delay = 5
+        
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(
+                    "http://localhost:1234/v1/chat/completions",
+                    json={
+                        "messages": [
+                            {"role": "system", "content": f"Du bist ein {language}-Experte. Antworte NUR mit Code."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        "temperature": 0.3,
+                        "max_tokens": 4000
+                    },
+                    timeout=180
+                )
+                return response.json()["choices"][0]["message"]["content"]
+            except requests.exceptions.RequestException as e:
+                if attempt < max_retries - 1:
+                    time.sleep(retry_delay)
+                    continue
+                logging.error(f"API-Fehler nach {max_retries} Versuchen: {str(e)}")
+                self.status_var.set(f"API-Fehler: {str(e)}")
+                return None
+            except Exception as e:
+                logging.error(f"Unerwarteter Fehler: {str(e)}")
+                self.status_var.set(f"Fehler: {str(e)}")
+                return None
 
     def create_backup(self, filepath):
         backup_dir = os.path.join(os.path.dirname(filepath), "backups")
@@ -173,39 +186,89 @@ Hier ist der Code:
             with open(filepath, "rb") as src, open(backup_path, "wb") as dst:
                 dst.write(src.read())
             return True
-        except Exception:
+        except Exception as e:
+            logging.error(f"Backup fehlgeschlagen für {filepath}: {str(e)}")
             return False
+
+    def process_code_chunk(self, chunk, prompt_template, language, filepath, chunk_info):
+        prompt = prompt_template.format(language=language, code=chunk)
+        self.status_var.set(f"Verarbeite {filepath} (Chunk {chunk_info})")
+        self.root.update_idletasks()
+        
+        response = self.ask_lm_studio(prompt, language)
+        if response:
+            return self.clean_code_response(response)
+        return chunk  # Bei Fehler originalen Chunk zurückgeben
 
     def update_file(self, filepath, index, total):
         try:
+            logging.info(f"Starte Verarbeitung: {filepath}")
+            
             if not self.create_backup(filepath):
                 return False
 
             with open(filepath, "r", encoding="utf-8") as f:
                 code = f.read()
 
+            # Dateigröße checken
+            if len(code) > 2 * 1024 * 1024:  # 2MB
+                self.status_var.set(f"Überspringe große Datei: {os.path.basename(filepath)}")
+                logging.warning(f"Datei zu groß, übersprungen: {filepath}")
+                return False
+
             prompt_template = self.prompt_entry.get("1.0", "end-1c")
             language = self.language_var.get()
-            prompt = prompt_template.format(language=language, code=code[:8000])
+            
+            # Code in sinnvolle Abschnitte teilen (bei Funktionen/Classes nicht mitten drin)
+            chunks = self.split_code_into_chunks(code, max_chunk_size=6000)
+            
+            updated_chunks = []
+            for i, chunk in enumerate(chunks):
+                processed_chunk = self.process_code_chunk(
+                    chunk, prompt_template, language, 
+                    os.path.basename(filepath),
+                    f"{i+1}/{len(chunks)}"
+                )
+                updated_chunks.append(processed_chunk)
 
-            self.status_var.set(f"Verarbeite {index}/{total}: {os.path.basename(filepath)}")
-            self.root.update_idletasks()
-
-            updated_code = self.ask_lm_studio(prompt, language)
-            if updated_code:
-                cleaned_code = self.clean_code_response(updated_code)
-                with open(filepath, "w", encoding="utf-8") as f:
-                    f.write(cleaned_code)
-                return True
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write("".join(updated_chunks))
+                
+            logging.info(f"Erfolgreich aktualisiert: {filepath}")
+            return True
+            
         except Exception as e:
-            self.status_var.set(f"Fehler bei {filepath}: {str(e)}")
-        return False
+            logging.error(f"Fehler bei {filepath}: {str(e)}")
+            self.status_var.set(f"Fehler bei {os.path.basename(filepath)}")
+            return False
+
+    def split_code_into_chunks(self, code, max_chunk_size):
+        """Teilt Code in sinnvolle Abschnitte, ohne mitten in Funktionen/Classes zu trennen"""
+        chunks = []
+        current_chunk = ""
+        
+        # Einfache Implementierung - kann für spezifische Sprachen verbessert werden
+        lines = code.split('\n')
+        for line in lines:
+            if len(current_chunk) + len(line) > max_chunk_size and current_chunk:
+                chunks.append(current_chunk)
+                current_chunk = line + '\n'
+            else:
+                current_chunk += line + '\n'
+        
+        if current_chunk:
+            chunks.append(current_chunk)
+            
+        return chunks
 
     def clean_code_response(self, code):
         if "```" in code:
             parts = code.split("```")
             if len(parts) > 1:
-                return parts[1].strip().lstrip("python\n")
+                # Entferne Markdown-Codeblöcke
+                code = parts[1].strip()
+                if code.lower().startswith("python\n"):
+                    code = code[7:]
         return code
 
     def run_update(self):
@@ -219,11 +282,17 @@ Hier ist der Code:
         extension = file_extensions.get(self.language_var.get(), ".py")
         target_files = []
 
+        MAX_FILE_SIZE = 2 * 1024 * 1024  # 2MB
         for root_dir, _, files in os.walk(directory):
-            target_files.extend(
-                os.path.join(root_dir, f) for f in files 
-                if f.endswith(extension) and not root_dir.endswith("backups")
-            )
+            for f in files:
+                if f.endswith(extension) and not root_dir.endswith("backups"):
+                    filepath = os.path.join(root_dir, f)
+                    file_size = os.path.getsize(filepath)
+                    if file_size <= MAX_FILE_SIZE:
+                        target_files.append(filepath)
+                    else:
+                        logging.warning(f"Datei übersprungen (zu groß): {filepath}")
+                        self.status_var.set(f"Überspringe große Datei: {f}")
 
         if not target_files:
             messagebox.showwarning("Keine Dateien", f"Keine {extension}-Dateien gefunden!")
@@ -241,7 +310,8 @@ Hier ist der Code:
         messagebox.showinfo(
             "Fertig", 
             f"{success}/{len(target_files)} Dateien erfolgreich aktualisiert!\n"
-            f"Backups wurden im 'backups'-Ordner gespeichert."
+            f"Backups wurden im 'backups'-Ordner gespeichert.\n"
+            f"Details im Logfile: code_updater.log"
         )
         self.status_var.set(f"Fertig - {success}/{len(target_files)} Dateien aktualisiert")
 
