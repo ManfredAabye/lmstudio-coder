@@ -22,7 +22,7 @@ file_extensions = {
     "Markdown": ".md", "PHP": ".php", "PowerShell": ".ps1", "Python": ".py",
     "Ruby": ".rb", "Rust": ".rs", "SQL": ".sql", "Shell": ".sh",
     "TypeScript": ".ts", "VBScript": ".vbs", "Visual Basic": ".vb",
-    "XML": ".xml", "YAML": ".yaml"
+    "XML": ".xml"
 }
 
 class CodeUpdaterApp:
