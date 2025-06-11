@@ -1,0 +1,5 @@
+{
+  "language": "Python",
+  "prompt": "\"\"\"Aktualisiere diesen Blender-Python-Code f\u00fcr Version 4.4:\n    - Ersetze veraltete API-Aufrufe (z. B. `bpy.context` \u2192 `bpy.context.scene`).\n    - Suche 2.8.0 und ersetze diese durch 4.4.0\n    - Behalte die Funktionalit\u00e4t bei.\n    Hier der Code:\\n\\n{code}\"\"\"",
+  "saved_at": "2025-06-11T10:36:32.959230"
+}
