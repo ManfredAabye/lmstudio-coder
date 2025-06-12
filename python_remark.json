@@ -1,0 +1,5 @@
+{
+  "language": "Python",
+  "prompt": "Füge NUR vor jeder Python-Funktion (def) Kommentarzeilen mit # ein:\n\n1. Format pro Funktion:\n# [Funktionszweck in 1 Satz]\n# Parameter: [param1] - [Beschreibung], [param2] - [Beschreibung]\n# Rückgabe: [Beschreibung]\n\n2. Strikte Regeln:\n- KEINE Änderungen am existierenden Code\n- KEINE Kommentare für Klassen (class)\n- KEINE Inline-Kommentare\n- KEINE Docstrings (''')\n- Maximal 3 Kommentarzeilen pro Funktion\n- Deutsche Beschreibungen\n\nBeispielausgabe:\n\n# Berechnet die Summe zweier Zahlen\n# Parameter: a - erste Zahl, b - zweite Zahl\n# Rückgabe: Summe als Float\ndef add_numbers(a, b):\n    return a + b\n\nOriginalcode:\n{code}",
+  "saved_at": "2025-06-11T10:36:32.959230"
+}
