@@ -1,0 +1,14 @@
+2025-06-12 09:59:33,371 - INFO - Starte Verarbeitung: D:/bauplatz/ki-test\KI-Code-Updater.py
+2025-06-12 09:59:33,383 - ERROR - Fehler bei D:/bauplatz/ki-test\KI-Code-Updater.py: 'FileProcessor' object has no attribute 'prompt_entry'
+2025-06-12 10:33:57,156 - INFO - Einstellungen geladen
+2025-06-12 10:34:10,896 - INFO - Prompt geladen aus D:/bauplatz/python_remark8.json
+2025-06-12 10:35:52,521 - INFO - Einstellungen geladen
+2025-06-12 10:36:01,630 - INFO - Prompt geladen aus D:/bauplatz/python_remark8.json
+2025-06-12 10:36:04,856 - INFO - Einstellungen gespeichert
+2025-06-12 10:36:12,741 - INFO - Erfolgreich aktualisiert: D:/bauplatz/ki-test\api_client.py
+2025-06-12 10:36:20,426 - INFO - Erfolgreich aktualisiert: D:/bauplatz/ki-test\config.py
+2025-06-12 10:36:57,627 - INFO - Erfolgreich aktualisiert: D:/bauplatz/ki-test\file_processor.py
+2025-06-12 10:37:48,141 - INFO - Erfolgreich aktualisiert: D:/bauplatz/ki-test\gui.py
+2025-06-12 10:37:54,213 - INFO - Erfolgreich aktualisiert: D:/bauplatz/ki-test\main.py
+2025-06-12 10:40:15,219 - INFO - Update erfolgreich abgeschlossen. 5 Dateien aktualisiert.
+2025-06-12 10:40:16,871 - INFO - Einstellungen gespeichert
