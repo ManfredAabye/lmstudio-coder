@@ -1,0 +1,6 @@
+{
+  "language": "C#",
+  "work_path": "D:\\opensimsource\\OpenSim",
+  "prompt": "\"\"\"Refactore das C#-Projekt in vier Phasen:\nPhase 0 – Grundlage: Einheitliche Formatierung, EditorConfig, Roslyn-Analyser, CI-Build.\nPhase 1 – Warnungsabbau & Dead Code: Entferne auskommentierten Code, ungenutzte Felder/Usings, vereinheitliche Null-Checks.\nPhase 2 – Nullability & Async: Nullable aktivieren, I/O-APIs auf async/await umstellen.\nPhase 3 – Struktur & Stabilität: Logging konsolidieren, Abhängigkeiten entkoppeln, Threading modernisieren.\nBehalte die Funktionalität bei. Hier der Code:\\n\\n{code}\"\"\"",
+  "saved_at": "2025-08-19T10:36:32.959230"
+}
